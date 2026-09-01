@@ -16,6 +16,7 @@ import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SpacesRouteImport } from './routes/spaces'
 
 const IndexRoute = IndexRouteImport.update({
@@ -53,6 +54,11 @@ const NotificationsRoute = NotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SpacesRoute = SpacesRouteImport.update({
   id: '/spaces',
   path: '/spaces',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/feed': typeof FeedRoute
   '/messages': typeof MessagesRoute
   '/notifications': typeof NotificationsRoute
+  '/profile': typeof ProfileRoute
   '/spaces': typeof SpacesRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/feed': typeof FeedRoute
   '/messages': typeof MessagesRoute
   '/notifications': typeof NotificationsRoute
+  '/profile': typeof ProfileRoute
   '/spaces': typeof SpacesRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/feed': typeof FeedRoute
   '/messages': typeof MessagesRoute
   '/notifications': typeof NotificationsRoute
+  '/profile': typeof ProfileRoute
   '/spaces': typeof SpacesRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/messages'
     | '/notifications'
+    | '/profile'
     | '/spaces'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/messages'
     | '/notifications'
+    | '/profile'
     | '/spaces'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/messages'
     | '/notifications'
+    | '/profile'
     | '/spaces'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   FeedRoute: typeof FeedRoute
   MessagesRoute: typeof MessagesRoute
   NotificationsRoute: typeof NotificationsRoute
+  ProfileRoute: typeof ProfileRoute
   SpacesRoute: typeof SpacesRoute
 }
 
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/spaces': {
       id: '/spaces'
       path: '/spaces'
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeedRoute: FeedRoute,
   MessagesRoute: MessagesRoute,
   NotificationsRoute: NotificationsRoute,
+  ProfileRoute: ProfileRoute,
   SpacesRoute: SpacesRoute,
 }
 export const routeTree = rootRouteImport
