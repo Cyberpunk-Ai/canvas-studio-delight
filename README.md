@@ -1,14 +1,16 @@
-# Welcome to your Lovable project
+# Canvas Studio Delight
+
+port and clone this repo https://github.com/Cyberpunk-Ai/canvas-studio.git then continue designing and building all features clean responsive and functional we shall add backend later for now design and drop completely functional ui which is smooth clean responsive modern cool animations whee neccessary and transitions and cool user experience clean designs
 
 This project was built with [Lovable](https://lovable.dev).
 
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/88e24544-0b97-4051-b620-fa3349effeeb).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +22,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
