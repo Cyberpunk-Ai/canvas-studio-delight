@@ -41,7 +41,7 @@ const mobileItems = navItems.filter((i) =>
   ["Home", "Explore", "Spaces", "Notifications", "Profile"].includes(i.label),
 );
 
-function NavLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
+function NavLink({ item, onClick }: { item: NavItem; onClick?: (() => void) | undefined }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const active = pathname === item.to;
   const Icon = item.icon;

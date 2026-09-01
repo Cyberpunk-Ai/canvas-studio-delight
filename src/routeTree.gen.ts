@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as FeedRouteImport } from './routes/feed'
+import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as SpacesRouteImport } from './routes/spaces'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const FeedRoute = FeedRouteImport.update({
   path: '/feed',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MessagesRoute = MessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SpacesRoute = SpacesRouteImport.update({
   id: '/spaces',
   path: '/spaces',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
+  '/messages': typeof MessagesRoute
   '/spaces': typeof SpacesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
+  '/messages': typeof MessagesRoute
   '/spaces': typeof SpacesRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
+  '/messages': typeof MessagesRoute
   '/spaces': typeof SpacesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/explore' | '/feed' | '/spaces'
+  fullPaths: '/' | '/explore' | '/feed' | '/messages' | '/spaces'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/explore' | '/feed' | '/spaces'
-  id: '__root__' | '/' | '/explore' | '/feed' | '/spaces'
+  to: '/' | '/explore' | '/feed' | '/messages' | '/spaces'
+  id: '__root__' | '/' | '/explore' | '/feed' | '/messages' | '/spaces'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ExploreRoute: typeof ExploreRoute
   FeedRoute: typeof FeedRoute
+  MessagesRoute: typeof MessagesRoute
   SpacesRoute: typeof SpacesRoute
 }
 
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FeedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/messages': {
+      id: '/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof MessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/spaces': {
       id: '/spaces'
       path: '/spaces'
@@ -106,6 +123,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ExploreRoute: ExploreRoute,
   FeedRoute: FeedRoute,
+  MessagesRoute: MessagesRoute,
   SpacesRoute: SpacesRoute,
 }
 export const routeTree = rootRouteImport
