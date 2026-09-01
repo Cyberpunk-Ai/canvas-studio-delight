@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as MessagesRouteImport } from './routes/messages'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as SpacesRouteImport } from './routes/spaces'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,6 +42,11 @@ const MessagesRoute = MessagesRouteImport.update({
   path: '/messages',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SpacesRoute = SpacesRouteImport.update({
   id: '/spaces',
   path: '/spaces',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
   '/messages': typeof MessagesRoute
+  '/notifications': typeof NotificationsRoute
   '/spaces': typeof SpacesRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
   '/messages': typeof MessagesRoute
+  '/notifications': typeof NotificationsRoute
   '/spaces': typeof SpacesRoute
 }
 export interface FileRoutesById {
@@ -70,15 +78,37 @@ export interface FileRoutesById {
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
   '/messages': typeof MessagesRoute
+  '/notifications': typeof NotificationsRoute
   '/spaces': typeof SpacesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/explore' | '/feed' | '/messages' | '/spaces'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/explore'
+    | '/feed'
+    | '/messages'
+    | '/notifications'
+    | '/spaces'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/explore' | '/feed' | '/messages' | '/spaces'
+  to:
+    | '/'
+    | '/auth'
+    | '/explore'
+    | '/feed'
+    | '/messages'
+    | '/notifications'
+    | '/spaces'
   id:
-    '__root__' | '/' | '/auth' | '/explore' | '/feed' | '/messages' | '/spaces'
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/explore'
+    | '/feed'
+    | '/messages'
+    | '/notifications'
+    | '/spaces'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -87,6 +117,7 @@ export interface RootRouteChildren {
   ExploreRoute: typeof ExploreRoute
   FeedRoute: typeof FeedRoute
   MessagesRoute: typeof MessagesRoute
+  NotificationsRoute: typeof NotificationsRoute
   SpacesRoute: typeof SpacesRoute
 }
 
@@ -127,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/spaces': {
       id: '/spaces'
       path: '/spaces'
@@ -143,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExploreRoute: ExploreRoute,
   FeedRoute: FeedRoute,
   MessagesRoute: MessagesRoute,
+  NotificationsRoute: NotificationsRoute,
   SpacesRoute: SpacesRoute,
 }
 export const routeTree = rootRouteImport
