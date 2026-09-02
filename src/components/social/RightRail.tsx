@@ -1,30 +1,64 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Search, TrendingUp, Radio, Plus, Check } from "lucide-react";
+import { toast } from "sonner";
 import { Avatar } from "@/components/social/Avatar";
 import { Panel } from "@/components/social/AppShell";
-import { compact, profiles, spaces, trendingTags, currentUserId } from "@/lib/mock-data";
+import { compact, spaces, trendingTags, currentUserId } from "@/lib/mock-data";
+import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
-export function SearchBox({ placeholder = "Search Lumen" }: { placeholder?: string }) {
+export function SearchBox({
+  placeholder = "Search Lumen",
+  value,
+  onChange,
+}: {
+  placeholder?: string;
+  value?: string;
+  onChange?: (v: string) => void;
+}) {
+  const navigate = useNavigate();
+  const [local, setLocal] = useState("");
+  const controlled = onChange !== undefined;
+  const v = controlled ? (value ?? "") : local;
+
   return (
-    <div className="group relative">
+    <form
+      role="search"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!controlled && v.trim()) navigate({ to: "/explore", search: { q: v.trim() } });
+      }}
+      className="group relative"
+    >
       <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-brand" />
       <input
+        value={v}
+        onChange={(e) => (controlled ? onChange(e.target.value) : setLocal(e.target.value))}
         placeholder={placeholder}
+        aria-label={placeholder}
         className="glass-panel h-12 w-full rounded-full pl-11 pr-4 text-sm outline-none transition-all duration-300 focus:shadow-soft focus:ring-2 focus:ring-brand/30"
       />
-    </div>
+    </form>
   );
 }
 
-function FollowButton({ initial = false }: { initial?: boolean }) {
-  const [following, setFollowing] = useState(initial);
+export function FollowButton({ userId, size = "sm" }: { userId: string; size?: "sm" | "md" }) {
+  const { isFollowing, dispatch, getProfile } = useStore();
+  const following = isFollowing(userId);
+  if (userId === currentUserId) return null;
   return (
     <button
-      onClick={() => setFollowing((f) => !f)}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        dispatch({ type: "toggleFollow", userId });
+        toast.success(following ? `Unfollowed ${getProfile(userId).display_name}` : `Following ${getProfile(userId).display_name}`);
+      }}
+      aria-pressed={following}
       className={cn(
-        "flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold transition-all duration-300 active:scale-95",
+        "flex items-center gap-1.5 rounded-full font-bold transition-all duration-300 active:scale-95",
+        size === "sm" ? "px-4 py-1.5 text-xs" : "px-5 py-2.5 text-sm",
         following
           ? "bg-foreground/5 text-muted-foreground hover:bg-foreground/10"
           : "bg-gradient-to-r from-brand to-brand-pink text-white hover:shadow-glow",
@@ -47,6 +81,7 @@ export function TrendingPanel() {
           <li key={t.tag}>
             <Link
               to="/explore"
+              search={{ q: t.tag }}
               className="block rounded-2xl px-3 py-2.5 transition-colors duration-300 hover:bg-foreground/5"
             >
               <p className="text-xs text-muted-foreground">{t.category}</p>
@@ -61,21 +96,31 @@ export function TrendingPanel() {
 }
 
 export function SuggestionsPanel() {
-  const people = profiles.filter((p) => p.id !== currentUserId).slice(0, 3);
+  const { profiles, isFollowing } = useStore();
+  const people = profiles.filter((p) => p.id !== currentUserId && !isFollowing(p.id)).slice(0, 3);
+  if (people.length === 0) return null;
   return (
     <Panel>
       <h2 className="mb-4 text-lg font-bold">Who to follow</h2>
       <ul className="space-y-3">
         {people.map((p) => (
           <li key={p.id} className="flex items-center gap-3">
-            <Avatar name={p.display_name} src={p.avatar_url} className="h-10 w-10 text-xs" />
+            <Link to="/u/$username" params={{ username: p.username }}>
+              <Avatar name={p.display_name} src={p.avatar_url} className="h-10 w-10 text-xs" />
+            </Link>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-bold">{p.display_name}</p>
+              <Link
+                to="/u/$username"
+                params={{ username: p.username }}
+                className="block truncate text-sm font-bold hover:underline"
+              >
+                {p.display_name}
+              </Link>
               <p className="truncate text-xs text-muted-foreground">
                 @{p.username} · {compact(p.followers)} followers
               </p>
             </div>
-            <FollowButton />
+            <FollowButton userId={p.id} />
           </li>
         ))}
       </ul>
@@ -99,6 +144,7 @@ export function LiveSpacesPanel() {
           <li key={s.id}>
             <Link
               to="/spaces"
+              search={{ join: s.id }}
               className="block overflow-hidden rounded-2xl p-3 transition-colors duration-300 hover:bg-foreground/5"
             >
               <div className="flex items-center gap-3">
@@ -130,9 +176,14 @@ export function RailFooter() {
   return (
     <p className="px-4 text-xs leading-relaxed text-muted-foreground">
       {links.map((l) => (
-        <span key={l} className="mr-2 cursor-pointer transition-colors hover:text-brand">
+        <button
+          key={l}
+          type="button"
+          onClick={() => toast(`${l} page coming soon`)}
+          className="mr-2 transition-colors hover:text-brand"
+        >
           {l}
-        </span>
+        </button>
       ))}
       <span className="mt-2 block">© 2026 Lumen</span>
     </p>
@@ -150,5 +201,3 @@ export function DefaultRail() {
     </div>
   );
 }
-
-export { FollowButton };
