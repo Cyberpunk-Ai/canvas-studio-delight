@@ -1,16 +1,42 @@
-import { useState } from "react";
-import { Image as ImageIcon, Smile, MapPin, Sparkles, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Image as ImageIcon, Smile, MapPin, Sparkles, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { Avatar } from "@/components/social/Avatar";
-import { currentUser } from "@/lib/mock-data";
+import { extractTags, useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 const LIMIT = 280;
 
-export function Composer({ onPost }: { onPost?: (content: string) => void }) {
+const gradients = [
+  "from-violet-500 via-fuchsia-500 to-pink-500",
+  "from-orange-400 via-rose-400 to-violet-500",
+  "from-sky-400 via-cyan-400 to-emerald-400",
+  "from-amber-400 via-orange-500 to-rose-500",
+];
+
+const emojis = ["✨", "🔥", "🎉", "💜", "😂", "👀", "🙌", "☕"];
+
+export function Composer({
+  autoFocus = false,
+  onPosted,
+  placeholder = "What's lighting you up today?",
+}: {
+  autoFocus?: boolean;
+  onPosted?: () => void;
+  placeholder?: string;
+}) {
+  const { me, dispatch } = useStore();
   const [draft, setDraft] = useState("");
   const [posting, setPosting] = useState(false);
-  const [focused, setFocused] = useState(false);
+  const [focused, setFocused] = useState(autoFocus);
+  const [gradient, setGradient] = useState<string | null>(null);
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [location, setLocation] = useState<string | null>(null);
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (autoFocus) ref.current?.focus();
+  }, [autoFocus]);
 
   const remaining = LIMIT - draft.length;
   const pct = Math.min(draft.length / LIMIT, 1);
@@ -22,12 +48,18 @@ export function Composer({ onPost }: { onPost?: (content: string) => void }) {
     setPosting(true);
     // Backend hook-up point: replace with an insert into `posts`.
     window.setTimeout(() => {
-      onPost?.(draft.trim());
+      const content = location ? `${draft.trim()}\n📍 ${location}` : draft.trim();
+      dispatch({ type: "addPost", content, tags: extractTags(draft), gradient });
       setDraft("");
+      setGradient(null);
+      setLocation(null);
       setPosting(false);
       toast.success("Posted to your feed");
-    }, 500);
+      onPosted?.();
+    }, 450);
   }
+
+  const expanded = focused || draft.length > 0 || gradient !== null;
 
   return (
     <form
@@ -38,30 +70,106 @@ export function Composer({ onPost }: { onPost?: (content: string) => void }) {
       )}
     >
       <div className="flex gap-3">
-        <Avatar name={currentUser.display_name} className="h-11 w-11 text-xs" />
+        <Avatar name={me.display_name} className="h-11 w-11 text-xs" />
         <div className="min-w-0 flex-1">
           <textarea
+            ref={ref}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            rows={focused || draft ? 3 : 1}
-            placeholder="What's lighting you up today?"
+            onKeyDown={(e) => {
+              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") submit(e);
+            }}
+            rows={expanded ? 3 : 1}
+            placeholder={placeholder}
             className="w-full resize-none bg-transparent text-[1.05rem] leading-relaxed placeholder:text-muted-foreground focus:outline-none"
           />
 
-          <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-3">
-            <div className="flex items-center gap-0.5 text-brand">
-              {[ImageIcon, Smile, MapPin, Sparkles].map((Icon, i) => (
+          {gradient && (
+            <div className="relative mt-2 animate-in fade-in zoom-in-95 overflow-hidden rounded-2xl duration-300">
+              <div className={cn("aspect-[16/9] w-full bg-gradient-to-br", gradient)} />
+              <button
+                type="button"
+                onClick={() => setGradient(null)}
+                aria-label="Remove image"
+                className="absolute right-2 top-2 rounded-full bg-black/50 p-1.5 text-white backdrop-blur transition-transform hover:scale-110"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
+
+          {location && (
+            <button
+              type="button"
+              onClick={() => setLocation(null)}
+              className="mt-2 flex items-center gap-1 rounded-full bg-brand/8 px-3 py-1 text-xs font-semibold text-brand"
+            >
+              <MapPin className="h-3 w-3" /> {location} <X className="h-3 w-3" />
+            </button>
+          )}
+
+          {showEmoji && (
+            <div className="mt-2 flex animate-in fade-in slide-in-from-top-1 flex-wrap gap-1 duration-200">
+              {emojis.map((e) => (
                 <button
-                  key={i}
+                  key={e}
                   type="button"
-                  aria-label="Composer tool"
-                  className="rounded-full p-2 transition-all duration-200 hover:bg-brand/10 active:scale-90"
+                  onClick={() => {
+                    setDraft((d) => d + e);
+                    ref.current?.focus();
+                  }}
+                  className="rounded-xl p-1.5 text-lg transition-transform hover:scale-125 active:scale-95"
                 >
-                  <Icon className="h-[1.1rem] w-[1.1rem]" />
+                  {e}
                 </button>
               ))}
+            </div>
+          )}
+
+          <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-3">
+            <div className="flex items-center gap-0.5 text-brand">
+              <button
+                type="button"
+                aria-label="Add image"
+                onClick={() => setGradient(gradients[Math.floor(Math.random() * gradients.length)]!)}
+                className="rounded-full p-2 transition-all duration-200 hover:bg-brand/10 active:scale-90"
+              >
+                <ImageIcon className="h-[1.1rem] w-[1.1rem]" />
+              </button>
+              <button
+                type="button"
+                aria-label="Add emoji"
+                onClick={() => setShowEmoji((v) => !v)}
+                className={cn(
+                  "rounded-full p-2 transition-all duration-200 hover:bg-brand/10 active:scale-90",
+                  showEmoji && "bg-brand/10",
+                )}
+              >
+                <Smile className="h-[1.1rem] w-[1.1rem]" />
+              </button>
+              <button
+                type="button"
+                aria-label="Add location"
+                onClick={() => setLocation(location ? null : me.location)}
+                className="rounded-full p-2 transition-all duration-200 hover:bg-brand/10 active:scale-90"
+              >
+                <MapPin className="h-[1.1rem] w-[1.1rem]" />
+              </button>
+              <button
+                type="button"
+                aria-label="Polish with AI"
+                onClick={() => {
+                  if (!draft.trim()) return toast("Write something first, then I'll polish it ✨");
+                  const polished = draft.trim().replace(/\s+/g, " ");
+                  setDraft(polished.charAt(0).toUpperCase() + polished.slice(1));
+                  toast.success("Tidied up your draft");
+                }}
+                className="rounded-full p-2 transition-all duration-200 hover:bg-brand/10 active:scale-90"
+              >
+                <Sparkles className="h-[1.1rem] w-[1.1rem]" />
+              </button>
             </div>
 
             <div className="flex items-center gap-3">
